@@ -1,24 +1,206 @@
 <!doctype html>
 <html lang="ru">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f5f5f0"><title>Смена — дневник водителя</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
-<body>
-<header class="topbar"><a class="brand" href="/" aria-label="Смена — главная"><span class="brand-icon">↗</span> смена<span class="brand-dot">.</span></a><span class="top-description">Дневник водителя</span><span class="profile"><span class="avatar">В</span> Мой дневник</span></header>
-<main>
- <div class="intro"><div><p class="eyebrow">КАЖДАЯ ПОЕЗДКА НА СЧЕТУ</p><h1>Ваша смена в цифрах</h1><p class="muted">Все поездки и заработок — в одном месте.</p></div><button class="primary" id="add-trip"><span aria-hidden="true">＋</span> Добавить поездку</button></div>
- <section class="daybar" aria-label="Выбор дня"><div class="date-controls"><button class="icon-button" id="previous" aria-label="Предыдущий день">←</button><label class="sr-only" for="date">День поездок</label><input id="date" type="date"><button class="icon-button" id="next" aria-label="Следующий день">→</button><button class="quiet" id="today">Сегодня</button></div><span id="timezone" class="muted small">Asia/Almaty</span></section>
- <div id="message" role="status" aria-live="polite" hidden></div>
- <section id="report" aria-busy="true">
- <div class="metrics">
-  <article class="metric net"><div class="metric-top"><span>На руки</span><span aria-hidden="true">↗</span></div><strong id="net">—</strong><p>После вычета комиссии</p></article>
-  <article class="metric"><div class="metric-top"><span>Выручка</span><span class="metric-symbol" aria-hidden="true">₸</span></div><strong id="revenue">—</strong><p>Сумма всех поездок</p></article>
-  <article class="metric"><div class="metric-top"><span>Комиссия</span><span class="metric-symbol" aria-hidden="true">%</span></div><strong id="commission">—</strong><p>Удержания за поездки</p></article>
-  <article class="metric"><div class="metric-top"><span>Поездки</span><span class="metric-symbol" aria-hidden="true">⇄</span></div><strong id="count">—</strong><p id="duration">За выбранный день</p></article>
- </div>
- <div class="content-grid">
-  <section class="panel trips-panel"><div class="panel-heading"><div><h2>Поездки за день</h2><p id="day-caption" class="muted small">Загружаем поездки…</p></div><span class="pill" id="trip-count">—</span></div><div class="table-wrap"><table><thead><tr><th>Время</th><th>Оплата</th><th class="number">Сумма</th><th class="number">Комиссия</th><th class="number">На руки</th></tr></thead><tbody id="trips"></tbody></table></div><div id="empty" hidden><span class="empty-icon" aria-hidden="true">↗</span><h3>Здесь начнётся ваша смена</h3><p class="muted">За этот день пока нет поездок.<br>Добавьте первую — мы посчитаем остальное.</p><button class="quiet" id="add-empty">Добавить поездку →</button></div></section>
-  <aside class="panel payment-panel"><p class="eyebrow">БАЛАНС ДНЯ</p><h2>Способы оплаты</h2><p class="muted small">Как поступила выручка</p><div class="payment-total" id="payment-total">—</div><div class="payment-bar" aria-hidden="true"><span id="cash-bar"></span><span id="card-bar"></span></div><div class="payment-row"><span><i class="dot cash"></i>Наличные</span><strong id="cash">—</strong></div><div class="payment-row"><span><i class="dot card"></i>Карта</span><strong id="card">—</strong></div><div class="note"><span aria-hidden="true">ⓘ</span><p>«На руки» — доход после комиссии. Он включает и наличные, и оплату картой.</p></div></aside>
- </div></section>
- <footer><span>Спокойная голова. Прозрачные цифры.</span><span>Смена · Дневник водителя</span></footer>
-</main>
-<dialog id="trip-dialog"><form id="trip-form"><div class="dialog-heading"><div><p class="eyebrow">НОВАЯ ЗАПИСЬ</p><h2>Добавить поездку</h2></div><button type="button" class="icon-button" id="close-dialog" aria-label="Закрыть">×</button></div><p class="muted small" id="form-zone">Время Астаны (UTC+05:00)</p><div class="form-grid"><label>Начало<input name="start" type="datetime-local" required></label><label>Окончание<input name="end" type="datetime-local" required></label><label>Сумма, ₸<input name="amount" type="number" min="0.01" max="1000000000" step="0.01" placeholder="2 400" required></label><label>Комиссия, ₸<input name="commission" type="number" min="0" max="1000000000" step="0.01" placeholder="360" required></label><label class="full">Способ оплаты<select name="payment"><option value="card">Карта</option><option value="cash">Наличные</option></select></label></div><p id="form-error" role="alert" hidden></p><div class="dialog-actions"><button type="button" class="quiet" id="cancel-dialog">Отмена</button><button class="primary" id="save-trip" type="submit">Сохранить поездку</button></div></form></dialog>
-</body></html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f5f0" />
+    <title>Смена — дневник водителя</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Смена — главная"
+        ><span class="brand-icon">↗</span> смена<span class="brand-dot"
+          >.</span
+        ></a
+      ><span class="top-description">Дневник водителя</span
+      ><span class="profile"><span class="avatar">В</span> Мой дневник</span>
+    </header>
+    <main>
+      <div class="intro">
+        <div>
+          <p class="eyebrow">КАЖДАЯ ПОЕЗДКА НА СЧЕТУ</p>
+          <h1>Ваша смена в цифрах</h1>
+          <p class="muted">Все поездки и заработок — в одном месте.</p>
+        </div>
+        <button class="primary" id="add-trip">
+          <span aria-hidden="true">＋</span> Добавить поездку
+        </button>
+      </div>
+      <section class="daybar" aria-label="Выбор дня">
+        <div class="date-controls">
+          <button
+            class="icon-button"
+            id="previous"
+            aria-label="Предыдущий день"
+          >
+            ←</button
+          ><label class="sr-only" for="date">День поездок</label
+          ><input id="date" type="date" /><button
+            class="icon-button"
+            id="next"
+            aria-label="Следующий день"
+          >
+            →</button
+          ><button class="quiet" id="today">Сегодня</button>
+        </div>
+        <span id="timezone" class="muted small">Asia/Almaty</span>
+      </section>
+      <div id="message" role="status" aria-live="polite" hidden></div>
+      <section id="report" aria-busy="true">
+        <div class="metrics">
+          <article class="metric net">
+            <div class="metric-top">
+              <span>На руки</span><span aria-hidden="true">↗</span>
+            </div>
+            <strong id="net">—</strong>
+            <p>После вычета комиссии</p>
+          </article>
+          <article class="metric">
+            <div class="metric-top">
+              <span>Выручка</span
+              ><span class="metric-symbol" aria-hidden="true">₸</span>
+            </div>
+            <strong id="revenue">—</strong>
+            <p>Сумма всех поездок</p>
+          </article>
+          <article class="metric">
+            <div class="metric-top">
+              <span>Комиссия</span
+              ><span class="metric-symbol" aria-hidden="true">%</span>
+            </div>
+            <strong id="commission">—</strong>
+            <p>Удержания за поездки</p>
+          </article>
+          <article class="metric">
+            <div class="metric-top">
+              <span>Поездки</span
+              ><span class="metric-symbol" aria-hidden="true">⇄</span>
+            </div>
+            <strong id="count">—</strong>
+            <p id="duration">За выбранный день</p>
+          </article>
+        </div>
+        <div class="content-grid">
+          <section class="panel trips-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Поездки за день</h2>
+                <p id="day-caption" class="muted small">Загружаем поездки…</p>
+              </div>
+              <span class="pill" id="trip-count">—</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Время</th>
+                    <th>Оплата</th>
+                    <th class="number">Сумма</th>
+                    <th class="number">Комиссия</th>
+                    <th class="number">На руки</th>
+                  </tr>
+                </thead>
+                <tbody id="trips"></tbody>
+              </table>
+            </div>
+            <div id="empty" hidden>
+              <span class="empty-icon" aria-hidden="true">↗</span>
+              <h3>Здесь начнётся ваша смена</h3>
+              <p class="muted">
+                За этот день пока нет поездок.<br />Добавьте первую — мы
+                посчитаем остальное.
+              </p>
+              <button class="quiet" id="add-empty">Добавить поездку →</button>
+            </div>
+          </section>
+          <aside class="panel payment-panel">
+            <p class="eyebrow">БАЛАНС ДНЯ</p>
+            <h2>Способы оплаты</h2>
+            <p class="muted small">Как поступила выручка</p>
+            <div class="payment-total" id="payment-total">—</div>
+            <div class="payment-bar" aria-hidden="true">
+              <span id="cash-bar"></span><span id="card-bar"></span>
+            </div>
+            <div class="payment-row">
+              <span><i class="dot cash"></i>Наличные</span
+              ><strong id="cash">—</strong>
+            </div>
+            <div class="payment-row">
+              <span><i class="dot card"></i>Карта</span
+              ><strong id="card">—</strong>
+            </div>
+            <div class="note">
+              <span aria-hidden="true">ⓘ</span>
+              <p>
+                «На руки» — доход после комиссии. Он включает и наличные, и
+                оплату картой.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <footer>
+        <span>Спокойная голова. Прозрачные цифры.</span
+        ><span>Смена · Дневник водителя</span>
+      </footer>
+    </main>
+    <dialog id="trip-dialog">
+      <form id="trip-form">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">НОВАЯ ЗАПИСЬ</p>
+            <h2>Добавить поездку</h2>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            id="close-dialog"
+            aria-label="Закрыть"
+          >
+            ×
+          </button>
+        </div>
+        <p class="muted small" id="form-zone">Время Астаны (UTC+05:00)</p>
+        <div class="form-grid">
+          <label
+            >Начало<input name="start" type="datetime-local" required /></label
+          ><label
+            >Окончание<input name="end" type="datetime-local" required /></label
+          ><label
+            >Сумма, ₸<input
+              name="amount"
+              type="number"
+              min="0.01"
+              max="1000000000"
+              step="0.01"
+              placeholder="2 400"
+              required /></label
+          ><label
+            >Комиссия, ₸<input
+              name="commission"
+              type="number"
+              min="0"
+              max="1000000000"
+              step="0.01"
+              placeholder="360"
+              required /></label
+          ><label class="full"
+            >Способ оплаты<select name="payment">
+              <option value="card">Карта</option>
+              <option value="cash">Наличные</option>
+            </select></label
+          >
+        </div>
+        <p id="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button type="button" class="quiet" id="cancel-dialog">Отмена</button
+          ><button class="primary" id="save-trip" type="submit">
+            Сохранить поездку
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
