@@ -1,0 +1,6 @@
+/bin/
+/data/trips.json
+/data/.trips-*.tmp
+coverage.out
+.DS_Store
+.env
